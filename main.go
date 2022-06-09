@@ -180,15 +180,19 @@ func main() {
 	}
 
 	for _, question := range q {
+		// given global questions q, for each question, is it one we care about?
 		if question.SurveyID == someSurveyID {
+			// yes, this one is
 			qs = append(qs, question)
+
+			// this is heinous... easy low-hanging fruit though. would be great to benchmark.
+			for _, response := range r {
+				if response.QuestionID == question.ID {
+					rs = append(rs, response)
+				}
+			}
 		}
 	}
-	// for _, response := range r {
-	// 	if response.QuestionID == someSurveyID {
-	// 		rs = append(rs, response)
-	// 	}
-	// }
 
 	fmt.Printf("relevant r[%d] q[%d]\n", len(rs), len(qs))
 
