@@ -202,10 +202,12 @@ func main() {
 
 	for k, v := range activememory {
 		fmt.Printf("questionID[%v] ResponseCount[%v]\n", k, len(v))
-		for top3 := range []int{1, 2, 3} {
-			score := activememory[k][top3].Score
-			fmt.Printf("%v :: %s\n", score, GetRating(score).pp())
+		var localsum float64
+		for _, v := range activememory[k] {
+			localsum += float64(v.Score)
+			// fmt.Printf("%v :: %s\n", v.Score, GetRating(v.Score).pp())
 		}
+		fmt.Printf("localavg[%v]\n", localsum/float64(len(activememory[k])))
 	}
 
 }
