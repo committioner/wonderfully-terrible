@@ -40,7 +40,7 @@ type Company struct {
 }
 
 func main() {
-	res, err := http.Get("https://interview-data.herokuapp.com/companies")
+	res, err := http.Get("https://interview-data.herokuapp.com/surveys")
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +54,7 @@ func main() {
 
 	// while the array contains values
 	for dec.More() {
-		var m Company
+		var m Survey
 		// decode an array value (Message)
 		err = dec.Decode(&m)
 		if err != nil {
