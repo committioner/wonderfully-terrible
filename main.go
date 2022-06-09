@@ -40,6 +40,12 @@ type Company struct {
 }
 
 func main() {
+	s := getSurveys()
+	fmt.Printf("in main: got surveys[%#v]\n", s)
+}
+
+func getSurveys() []Survey {
+	var s []Survey
 	res, err := http.Get("https://interview-data.herokuapp.com/surveys")
 	if err != nil {
 		panic(err)
@@ -60,8 +66,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		fmt.Printf("%v: %v\n", m.ID, m.Name)
+		s = append(s, m)
 	}
 
 	// read closing bracket
@@ -69,4 +74,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	return s
 }
