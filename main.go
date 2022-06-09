@@ -168,11 +168,14 @@ func main() {
 	var (
 		qs []Question
 		rs []Response
+
+		//ii.
+		activememory = make(map[string][]Response) // mapping questionID -> slice(list) of type Response
 	)
 
 	for _, v := range s {
 		if v.ID == someSurveyID {
-			fmt.Printf("found it!")
+			fmt.Println("found it!")
 			break
 		} else {
 			fmt.Printf("n")
@@ -184,17 +187,25 @@ func main() {
 		if question.SurveyID == someSurveyID {
 			// yes, this one is
 			qs = append(qs, question)
-
+			activememory[question.ID] = make([]Response, 0)
 			// this is heinous... easy low-hanging fruit though. would be great to benchmark.
 			for _, response := range r {
 				if response.QuestionID == question.ID {
 					rs = append(rs, response)
+					activememory[question.ID] = append(activememory[question.ID], response)
 				}
 			}
 		}
 	}
 
-	fmt.Printf("relevant r[%d] q[%d]\n", len(rs), len(qs))
+	fmt.Printf("local gophers ctx minima for summary on someSurveyID(%s) r[%d] q[%d]\n", someSurveyID, len(rs), len(qs))
+
+	for k, v := range activememory {
+		fmt.Printf("questionID[%v] ResponseCount[%v]\n", k, len(v))
+		// for top3 := range []int{1, 2, 3} {
+		// 	fmt.Printf("%v\n", activememory[k][top3])
+		// }
+	}
 
 }
 
