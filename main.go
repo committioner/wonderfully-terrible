@@ -53,16 +53,31 @@ type Company struct {
 	Name string `json:"name"`
 }
 
+var (
+	s []Survey
+	q []Question
+	r []Response
+)
+
+// omniscient gopher? let alone, a bit WET
+// too much power spider man... would be nice to externalize from main duties though. I want to check fs first anyways maybe? plenty of orthagonal cases which may be at-first unrelated but... you get the picture.
+func init() {
+	fmt.Printf("priming...")
+	defer fmt.Print("primed") //time.Now()?
+
+	s = getSurveys()
+	// fmt.Printf("in init: got surveys[%#v]\n", s)
+
+	// q = getQuestions()
+	// fmt.Printf("q[%#v]\n", q)
+
+	// r = getResponses()
+	// fmt.Printf("r[%#v]\n", r)
+}
+
 func main() {
-	s := getSurveys()
-	fmt.Printf("in main: got surveys[%#v]\n", s)
-
-	q := getQuestions()
-	fmt.Printf("q[%#v]\n", q)
-
-	r := getResponses()
-	fmt.Printf("r[%#v]\n", r)
-
+	fmt.Printf("in main: init done!")
+	fmt.Printf("surveys in! get em while theyre hot :-)\n%v\n", s)
 }
 
 func getSurveys() []Survey {
