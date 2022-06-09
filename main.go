@@ -62,13 +62,8 @@ var (
 	r []Response
 )
 
-// omniscient gopher? let alone, a bit WET
-// too much power spider man... would be nice to externalize from main duties though. I want to check fs first anyways maybe? plenty of orthagonal cases which may be at-first unrelated but... you get the picture.
-func init() {
-	fmt.Printf("DEBUG: priming...")
-	defer func(t time.Time) {
-		fmt.Printf("DEBUG: primed (%v)\n", time.Now().Sub(t)) //time.Now()?
-	}(time.Now())
+// from either FS if ran prior, or web if FS cache data files arent present or otherwise err on os.Open
+func hydrateServiceCache() {
 
 	const fscachedir = `./data/`
 
@@ -95,29 +90,76 @@ func init() {
 		surveyStream := dat
 		fmt.Println(`INFO: loading from cached file ./data/surveys`)
 		s = getSurveys(surveyStream)
-
 	}
-	// fmt.Printf("in init: got surveys[%#v]\n", s)
-	// res, err := http.Get("https://interview-data.herokuapp.com/survey-questions")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// questionStream := res.Body
-	// q = getQuestions(questionStream)
-	// fmt.Printf("q[%#v]\n", q)
+	responsecache := fscachedir + "survey-responses"
+	//const surveysURL etc could be handy wiring for that network/REST API/JSON+HTTP wiring. sounds like messing config. what to move to compile-time, init-time, run-time, is always a fun game of semantics.
+	rdat, err := os.Open(responsecache)
+	if err != nil {
+		// if we do encounter an error, we can assume its... file unfound? :D happy-pathing here for now, adding ~syslog verbosity levels to point that out but defering any wiring heft given ~externalities.
+		fmt.Println("INFO: couldnt load from cached files on fs, os.Open(%s)", responsecache)
+		fmt.Printf("err when trying to load from FS cache: %s\n", err)
 
-	// res, err := http.Get("https://interview-data.herokuapp.com/survey-responses")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// responseStream := res.Body
-	// r = getResponses(responseStream)
-	// fmt.Printf("r[%#v]\n", r)
+		response, err := http.Get("https://interview-data.herokuapp.com/surveys")
+		if err != nil {
+			panic(err)
+		}
+		responseStream := response.Body
+		r = getResponses(responseStream)
+		m, err := json.Marshal(s) //this feels like it could be so much better each second more i spend looking...
+		os.WriteFile(responsecache, m, 0644)
+		if err != nil {
+			panic(err) //good memes from this idiomatic ~repetition
+		}
+	} else {
+		responseStream := rdat
+		fmt.Printf("INFO: loading from cached file %s\n", responsecache)
+		r = getResponses(responseStream)
+	}
+
+	questioncache := fscachedir + "survey-questions"
+	//const surveysURL etc could be handy wiring for that network/REST API/JSON+HTTP wiring. sounds like messing config. what to move to compile-time, init-time, run-time, is always a fun game of semantics.
+	qdat, err := os.Open(questioncache)
+	if err != nil {
+		// if we do encounter an error, we can assume its... file unfound? :D happy-pathing here for now, adding ~syslog verbosity levels to point that out but defering any wiring heft given ~externalities.
+		fmt.Println("INFO: couldnt load from cached files on fs, os.Open(%s)", questioncache)
+		fmt.Printf("err when trying to load from FS cache: %s\n", err)
+
+		response, err := http.Get("https://interview-data.herokuapp.com/survey-questions")
+		if err != nil {
+			panic(err)
+		}
+		questionStream := response.Body
+		q = getQuestions(questionStream)
+		m, err := json.Marshal(s) //this feels like it could be so much better each second more i spend looking...
+		os.WriteFile(questioncache, m, 0644)
+		if err != nil {
+			panic(err) //good memes from this idiomatic ~repetition
+		}
+	} else {
+		questionStream := qdat
+		fmt.Printf("INFO: loading from cached file %s\n", questioncache)
+		q = getQuestions(questionStream)
+	}
+}
+
+// omniscient gopher? let alone, a bit WET
+// too much power spider man... would be nice to externalize from main duties though. I want to check fs first anyways maybe? plenty of orthagonal cases which may be at-first unrelated but... you get the picture.
+func init() {
+
+	fmt.Printf("DEBUG: priming...")
+	defer func(t time.Time) {
+		fmt.Printf("DEBUG: primed (%v)\n", time.Now().Sub(t)) //time.Now()?
+	}(time.Now())
+
+	hydrateServiceCache()
+
 }
 
 func main() {
 	fmt.Println("surveys in! get em while theyre hot :-)")
 	fmt.Printf("%d surveys found\n", len(s))
+	fmt.Printf("%d questions found\n", len(q))
+	fmt.Printf("%d responses found\n", len(r))
 }
 
 func getSurveys(in io.Reader) []Survey {
