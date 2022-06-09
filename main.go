@@ -38,6 +38,14 @@ type Question struct {
 	SurveyID string //!!
 	Prompt   string
 }
+
+type Response struct {
+	ID         string
+	QuestionID string // !!
+	EmployeeID string //   !!!
+	Score      int
+}
+
 type Companies []Company
 
 type Company struct {
@@ -51,6 +59,9 @@ func main() {
 
 	q := getQuestions()
 	fmt.Printf("q[%#v]\n", q)
+
+	r := getResponses()
+	fmt.Printf("r[%#v]\n", r)
 
 }
 
@@ -118,4 +129,37 @@ func getQuestions() []Question {
 		log.Fatal(err)
 	}
 	return q
+}
+
+func getResponses() []Response {
+	var r []Response
+	res, err := http.Get("https://interview-data.herokuapp.com/survey-responses")
+	if err != nil {
+		panic(err)
+	}
+
+	dec := json.NewDecoder(res.Body)
+	// read open bracket
+	_, err = dec.Token()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// while the array contains values
+	for dec.More() {
+		var tmp Response
+		// decode an array value (Message)
+		err = dec.Decode(&tmp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		r = append(r, tmp)
+	}
+
+	// read closing bracket
+	_, err = dec.Token()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return r
 }
