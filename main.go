@@ -73,6 +73,7 @@ func init() {
 	const fscachedir = `./data/`
 
 	surveycache := fscachedir + "surveys"
+	//const surveysURL etc could be handy wiring for that network/REST API/JSON+HTTP wiring. sounds like messing config. what to move to compile-time, init-time, run-time, is always a fun game of semantics.
 	dat, err := os.Open(surveycache)
 	if err != nil {
 		// if we do encounter an error, we can assume its... file unfound? :D happy-pathing here for now, adding ~syslog verbosity levels to point that out but defering any wiring heft given ~externalities.
