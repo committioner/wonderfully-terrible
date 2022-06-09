@@ -1,0 +1,1 @@
+an attempt at showing some cool go stuff ive picked up over the years. the channels primitves for ~lockless/async impl are particularly cool, among other facets.
