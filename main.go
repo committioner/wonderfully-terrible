@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 // appdx
@@ -63,15 +64,32 @@ var (
 // omniscient gopher? let alone, a bit WET
 // too much power spider man... would be nice to externalize from main duties though. I want to check fs first anyways maybe? plenty of orthagonal cases which may be at-first unrelated but... you get the picture.
 func init() {
-	fmt.Printf("priming...")
-	defer fmt.Print("primed\n") //time.Now()?
+	fmt.Printf("DEBUG: priming...")
+	defer fmt.Print("DEBUG: primed\n") //time.Now()?
 
-	response, err := http.Get("https://interview-data.herokuapp.com/surveys")
+	dat, err := os.Open("./data/surveys")
 	if err != nil {
-		panic(err)
+		// if we do encounter an error, we can assume its... file unfound? :D happy-pathing here for now, adding ~syslog verbosity levels to point that out but defering any wiring heft given ~externalities.
+		fmt.Println(`INFO: couldnt load from cached files on fs, os.Open("./data/surveys")`)
+		fmt.Printf("err when trying to load from FS cache: %s\n", err)
+
+		response, err := http.Get("https://interview-data.herokuapp.com/surveys")
+		if err != nil {
+			panic(err)
+		}
+		surveyStream := response.Body
+		s = getSurveys(surveyStream)
+		m, err := json.Marshal(s) //this feels like it could be so much better each second more i spend looking...
+		os.WriteFile("data/surveys", m, 0644)
+		if err != nil {
+			panic(err) //good memes from this idiomatic ~repetition
+		}
+	} else {
+		surveyStream := dat
+		fmt.Println(`INFO: loading from cached file ./data/surveys`)
+		s = getSurveys(surveyStream)
+
 	}
-	surveyStream := response.Body
-	s = getSurveys(surveyStream)
 	// fmt.Printf("in init: got surveys[%#v]\n", s)
 	// res, err := http.Get("https://interview-data.herokuapp.com/survey-questions")
 	// if err != nil {
