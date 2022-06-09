@@ -37,16 +37,16 @@ type Survey struct {
 }
 
 type Question struct {
-	ID       string
-	SurveyID string //!!
-	Prompt   string
+	ID       string `json:"id"`
+	SurveyID string `json:"survey_id"` //!!
+	Prompt   string `json:"prompt"`
 }
 
 type Response struct {
-	ID         string
-	QuestionID string // !!
-	EmployeeID string //   !!!
-	Score      int
+	ID         string `json:"id"`
+	QuestionID string `json:"question_id"` // !!
+	EmployeeID string `json:"employee_id"` //   !!!
+	Score      int    `json:"score"`
 }
 
 type Companies []Company
@@ -160,6 +160,38 @@ func main() {
 	fmt.Printf("%d surveys found\n", len(s))
 	fmt.Printf("%d questions found\n", len(q))
 	fmt.Printf("%d responses found\n", len(r))
+
+	//this is the one we care about, wrt state-of-things in the livecoding session
+	const someSurveyID = "17feca64-e756-4f15-beac-1dbbb293c227"
+
+	// this funcmain() gophers ~internal state/context:
+	var (
+		qs []Question
+		rs []Response
+	)
+
+	for _, v := range s {
+		if v.ID == someSurveyID {
+			fmt.Printf("found it!")
+			break
+		} else {
+			fmt.Printf("n")
+		}
+	}
+
+	for _, question := range q {
+		if question.SurveyID == someSurveyID {
+			qs = append(qs, question)
+		}
+	}
+	// for _, response := range r {
+	// 	if response.QuestionID == someSurveyID {
+	// 		rs = append(rs, response)
+	// 	}
+	// }
+
+	fmt.Printf("relevant r[%d] q[%d]\n", len(rs), len(qs))
+
 }
 
 func getSurveys(in io.Reader) []Survey {
