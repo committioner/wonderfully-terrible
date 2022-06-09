@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 // appdx
@@ -65,9 +66,14 @@ var (
 // too much power spider man... would be nice to externalize from main duties though. I want to check fs first anyways maybe? plenty of orthagonal cases which may be at-first unrelated but... you get the picture.
 func init() {
 	fmt.Printf("DEBUG: priming...")
-	defer fmt.Print("DEBUG: primed\n") //time.Now()?
+	defer func(t time.Time) {
+		fmt.Printf("DEBUG: primed (%v)\n", time.Now().Sub(t)) //time.Now()?
+	}(time.Now())
 
-	dat, err := os.Open("./data/surveys")
+	const fscachedir = `./data/`
+
+	surveycache := fscachedir + "surveys"
+	dat, err := os.Open(surveycache)
 	if err != nil {
 		// if we do encounter an error, we can assume its... file unfound? :D happy-pathing here for now, adding ~syslog verbosity levels to point that out but defering any wiring heft given ~externalities.
 		fmt.Println(`INFO: couldnt load from cached files on fs, os.Open("./data/surveys")`)
