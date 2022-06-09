@@ -32,6 +32,12 @@ type Survey struct {
 	CompanyID string //type company? feels like it def should be, but still plenty of known unknowns
 	Name      string
 }
+
+type Question struct {
+	ID       string
+	SurveyID string //!!
+	Prompt   string
+}
 type Companies []Company
 
 type Company struct {
@@ -42,6 +48,10 @@ type Company struct {
 func main() {
 	s := getSurveys()
 	fmt.Printf("in main: got surveys[%#v]\n", s)
+
+	q := getQuestions()
+	fmt.Printf("q[%#v]\n", q)
+
 }
 
 func getSurveys() []Survey {
@@ -60,13 +70,13 @@ func getSurveys() []Survey {
 
 	// while the array contains values
 	for dec.More() {
-		var m Survey
+		var tmp Survey
 		// decode an array value (Message)
-		err = dec.Decode(&m)
+		err = dec.Decode(&tmp)
 		if err != nil {
 			log.Fatal(err)
 		}
-		s = append(s, m)
+		s = append(s, tmp)
 	}
 
 	// read closing bracket
@@ -75,4 +85,37 @@ func getSurveys() []Survey {
 		log.Fatal(err)
 	}
 	return s
+}
+
+func getQuestions() []Question {
+	var q []Question
+	res, err := http.Get("https://interview-data.herokuapp.com/survey-questions")
+	if err != nil {
+		panic(err)
+	}
+
+	dec := json.NewDecoder(res.Body)
+	// read open bracket
+	_, err = dec.Token()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// while the array contains values
+	for dec.More() {
+		var tmp Question
+		// decode an array value (Message)
+		err = dec.Decode(&tmp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		q = append(q, tmp)
+	}
+
+	// read closing bracket
+	_, err = dec.Token()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return q
 }
