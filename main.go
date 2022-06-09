@@ -202,9 +202,10 @@ func main() {
 
 	for k, v := range activememory {
 		fmt.Printf("questionID[%v] ResponseCount[%v]\n", k, len(v))
-		// for top3 := range []int{1, 2, 3} {
-		// 	fmt.Printf("%v\n", activememory[k][top3])
-		// }
+		for top3 := range []int{1, 2, 3} {
+			score := activememory[k][top3].Score
+			fmt.Printf("%v :: %s\n", score, GetRating(score).pp())
+		}
 	}
 
 }
