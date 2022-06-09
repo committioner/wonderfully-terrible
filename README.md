@@ -4,6 +4,9 @@ an attempt at showing some cool go stuff ive picked up over the years. the chann
 
 so far, this doesnt do much except show the overhead associated with `JSON over HTTP` activites in go syntax
 
+
+this is in a good(better? at least) spot now for setting up the actual ~pipeline/gophers/zoo.
+
 ## helpful commands:
 - /bin/bash ~> `curl -LOs "https://interview-data.herokuapp.com/{surveys,survey-questions,survey-responses}"`
 
