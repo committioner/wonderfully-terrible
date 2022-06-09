@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 )
@@ -63,31 +64,45 @@ var (
 // too much power spider man... would be nice to externalize from main duties though. I want to check fs first anyways maybe? plenty of orthagonal cases which may be at-first unrelated but... you get the picture.
 func init() {
 	fmt.Printf("priming...")
-	defer fmt.Print("primed") //time.Now()?
+	defer fmt.Print("primed\n") //time.Now()?
 
-	s = getSurveys()
+	response, err := http.Get("https://interview-data.herokuapp.com/surveys")
+	if err != nil {
+		panic(err)
+	}
+	surveyStream := response.Body
+	s = getSurveys(surveyStream)
 	// fmt.Printf("in init: got surveys[%#v]\n", s)
-
-	// q = getQuestions()
+	// res, err := http.Get("https://interview-data.herokuapp.com/survey-questions")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// questionStream := res.Body
+	// q = getQuestions(questionStream)
 	// fmt.Printf("q[%#v]\n", q)
 
-	// r = getResponses()
+	// res, err := http.Get("https://interview-data.herokuapp.com/survey-responses")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// responseStream := res.Body
+	// r = getResponses(responseStream)
 	// fmt.Printf("r[%#v]\n", r)
 }
 
 func main() {
-	fmt.Printf("in main: init done!")
-	fmt.Printf("surveys in! get em while theyre hot :-)\n%v\n", s)
+	fmt.Println("surveys in! get em while theyre hot :-)")
+	fmt.Printf("%d surveys found\n", len(s))
 }
 
-func getSurveys() []Survey {
-	var s []Survey
-	res, err := http.Get("https://interview-data.herokuapp.com/surveys")
-	if err != nil {
-		panic(err)
-	}
+func getSurveys(in io.Reader) []Survey {
+	var (
+		err error
+		s   []Survey
 
-	dec := json.NewDecoder(res.Body)
+		dec = json.NewDecoder(in)
+	)
+
 	// read open bracket
 	_, err = dec.Token()
 	if err != nil {
@@ -110,17 +125,18 @@ func getSurveys() []Survey {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	return s
 }
 
-func getQuestions() []Question {
-	var q []Question
-	res, err := http.Get("https://interview-data.herokuapp.com/survey-questions")
-	if err != nil {
-		panic(err)
-	}
+func getQuestions(in io.Reader) []Question {
+	var (
+		err error
+		q   []Question
 
-	dec := json.NewDecoder(res.Body)
+		dec = json.NewDecoder(in)
+	)
+
 	// read open bracket
 	_, err = dec.Token()
 	if err != nil {
@@ -143,17 +159,18 @@ func getQuestions() []Question {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	return q
 }
 
-func getResponses() []Response {
-	var r []Response
-	res, err := http.Get("https://interview-data.herokuapp.com/survey-responses")
-	if err != nil {
-		panic(err)
-	}
+func getResponses(in io.Reader) []Response {
+	var (
+		err error
+		r   []Response
 
-	dec := json.NewDecoder(res.Body)
+		dec = json.NewDecoder(in)
+	)
+
 	// read open bracket
 	_, err = dec.Token()
 	if err != nil {
@@ -176,5 +193,6 @@ func getResponses() []Response {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	return r
 }
